@@ -1,0 +1,345 @@
+import { SideNote } from "../components/SideNote";
+import { Terminal } from "../components/Terminal";
+
+# Introduction to Git
+
+## Why use Git in Digital Humanities?
+
+As knowledge workers, we constantly create and edit content, change a document, save it, change it again, share it with colleagues, etc.
+
+Git is a free and open-source "version control" software, which can help that process by:
+
+- tracking changes, and versioning content and code
+- fostering collaborative work, with diffing and conflict resolution, as well as clear attribution
+
+Git works best when used with plaintext file formats such as source code, XML/TEI documents or Markdown content. While Git will happily *store* images, audio files, or `.doc` and `.pdf` documents, it was not *designed* for those.
+
+## Tracking changes
+
+Let's start by looking at how Git can help with tracking changes in a project (we'll cover team work and collaboration later in the second part of this introduction).
+
+Most of us will have encountered, and used, _some_ kind of version control: either some custom file naming convention to mark versions of a document, change tracking functionality built into word processors, or the history view of document edits on Wikipedia.
+
+Git can record which changes, to which documents, have been made when, and by whom. It allows to keep a detailed revision history of a project, because it can save snapshots of a project at specific points in time, thus being open to review any time in the future.
+
+Version control allows to save versions of content, restore previous versions, and compare different versions. This is especially beneficial when working with multiple documents, and when working in teams of more than one (potentially working on the same document).
+
+Let's look at how change tracking with Git works in practice, in a local project on your computer (no network connection required). We'll walk through how to work with Git in the terminal, because that is where Git was originally meant to be used, and because it helps to understand what is actually going on. This involves learning a handful of Git commands, and while that might seem intimidating at first, you'll see that it becomes second-nature with a bit of practice very quickly. However, if you prefer to work with Git via a graphical user interface, take a look at the bonus section at the end of this introduction, which lists some popular editor integrations.
+
+<SideNote type="info" title="Installation instructions">
+
+If you haven't yet installed Git on your computer, follow the instructions on [https://git-scm.com/downloads](https://git-scm.com/downloads).
+
+You should also provide some initial configuration:
+
+```bash
+git config --global user.name "My name"
+git config --global user.email "myname@example.com"
+# git config --global init.defaultbranch "main"
+```
+
+</SideNote>
+
+### Initialise a Git project
+
+First, we need to tell Git that it should start to manage a project directory and keep an eye on changes to documents there. Navigate to your project folder in your terminal of choice, and type:
+
+```bash
+git init
+```
+
+This will initially set up Git's internal bookkeeping metadata, which is stored in a hidden `.git` folder.
+
+Let's also create some new content. In a real research project this would mean editing or adding an XML/TEI document or similar. To demonstrate the mechanics we'll keep it basic here and use the terminal to create a simple text file (don't worry how this works, this has nothing to do with Git):
+
+
+```bash
+echo "This is my text document." > my-document.txt
+```
+
+### Check status
+
+We can always check what Git knows about the state of our project with:
+
+```bash
+git status
+```
+
+Note that Git informs us that changes have been made to a file called `my-document.txt`, but that file is currently "untracked", which means it is not currently managed by Git's versioning. Git also tells us that in order to tell it to keep track of changes to that file, we should "use `git add` to track". Generally, if you find yourself in situations where you're unsure how to proceed, `git status` will most of the time show helpful hints. It's probably the Git command you'll be using most often.
+
+### Mark content changes to be included in the version history
+
+Let's follow the advice and use `git add` to tell Git to keep an eye on changes to the newly created document `my-document.txt`:
+
+```bash
+git add my-document.txt
+```
+
+<SideNote type="info" title="Adding multiple files">
+
+To add multiple files, it is possible to list them individually:
+
+```bash
+git add first-document.txt second-document.txt
+```
+
+Or, to include *all* changes to the project:
+
+```bash
+git add -A
+````
+
+</SideNote>
+
+However, we'll notice when checking `git status` that the changes to `my-document.txt` are yet "to be committed". Wtf!?
+
+### Bundle changes into meaningful chunks
+
+Including content changes in Git's version history involves a two-step process. First, we put changes in a "holding zone" or "staging area" (this is what we did with `git add`). We can continue adding related changes to other documents, or additional newly created documents. This allows creating semantically meaningful units of changes.
+
+When all related changes have been added to the "holding area", we can save them together as a version history snapshot, with a message that briefly describes the changes so it is easy to find them later when viewing the version history.
+
+These units are called "commits", and "committing" means permanently recording a snapshot of contents at a specific point in time, with a message describing the change:
+
+```bash
+git commit -m "Add test document"
+```
+
+<SideNote type="info" title="Commit messages">
+
+Commit messages are usually written in imperative language. For example it is customary to say "Change document title", not "Changed document title". Nevertheless, it's perfectly fine to agree on different project-specific conventions, just try to be consistent.
+
+Also, when in a hurry, it's tempting to write non-descriptive commit messages like "Added changes". Try to come up with something that describes the change, you'll thank yourself later!
+
+</SideNote>
+
+Every project snapshot we commit to history should include a semantically meaningful set of changes, and this may involve edits to different documents. `git add` allows to granularly choose which changes, to which files should be part of the next snapshot, while `git commit` will label that set of changes, and actually save a new snapshot.
+
+### View history of changes (log)
+
+Getting into the habif of assigning descriptive commit messages is especially helpful when viewing the history of changes. Git will print a changelog with:
+
+```bash
+git log --oneline
+```
+
+Note that we have one entry in our version history, and that Git has assigned the commit message we have provided, as well as an internal identifier to that entry. That identifier consists of 40 alphanumeric characters, but usually the first few characters are enough to uniquely address a commit in a project.
+
+### View individual changes
+
+Git will display the exact changes which were made in a commit snapshot with:
+
+```bash
+git show 7f733ac
+```
+
+That last bit is the unique identifier which is assigned to every commit in Git's version history. We've seen above how we can figure out these ids from inspecting the changelog displayed with `git status`. Note that when you have followed the steps in this introduction on your own computer, the unique identifier you see will be different from the one above. This is because they are calculated from filename and content, author, commit message, and commit date.
+
+### Compare two snapshots
+
+It is also possible to show changes between two specific commit snapshots. Let's first add another change, so there are actually two separate entries in our commit history (again, how creating and editing a document on the terminal works is unimportant here, but the two-step process of creating a snapshot with `git add` and `git commit` should already be familiar):
+
+```bash
+echo "This is another document." > another-document.txt # creates a new document
+sed -i s/text/test/ my-document.txt # changes "Hello" to "Hi" in `my-document.txt``
+git add -A
+git commit -m "Add new document and change initial document"
+```
+
+To list the difference between two commit snapshots we'll first find out their respective unique identifiers, and then tell Git to compare those:
+
+```bash
+git log --oneline
+git diff 7f733ac ab9b27f
+```
+
+<SideNote type="info" title="Diffing not-yet-committed work">
+
+To compare working directory to staging area:
+
+```bash
+git diff
+```
+
+To compare staging are to repository, i.e. last commit to next commit:
+
+```bash
+git diff --staged
+```
+
+</SideNote>
+
+The format in which the changes are displayed can be a bit hard to read in the terminal, especially for larger changesets, so it's best to view them in a real text editor. (TODO: `git config --global diff.tool` or too confusing?)
+
+### Timetravel
+
+Alternatively, Git allows to "time travel" to a specific point in a project's history. You can inspect how each document looked like at that point in time, without losing any subsequent changes:
+
+```bash
+git checkout 7f733ac
+```
+
+Once you're done looking around, don't forget to return to the present! The easiest way is with:
+
+```bash
+git checkout main
+```
+
+The `main` identifier is just shortcut way to refer to the default timeline (it's actually the default *branch* of the timeline, because there can be multiple parallel timelines 🤯, we'll have a look at these branches in the second part of this introduction).
+
+### Undo changes
+
+Finally, Git also allows to undo changes. Even though Git forces us to be very intentional about which changes end up in the changelog (we neeeded to go through the two-step `git add` and `git commit` process after all), sometimes you'll still want to dicard some of them.
+
+There are three possible ways to do this.
+
+```bash
+git revert ab9b27f
+```
+
+Reverting a commit will keep that snapshot in the version history, and create a *new* snapshot with the changes removed. This is useful when you want to keep a record of the initial changes, and the fact that they have been reverted.
+
+```bash
+git reset 7f733ac
+```
+
+Reseting history allows to "rewind the clock" to a specific point im time (addressed via unique identifier), without losing the changes that have been made to documents in these changes. It's mostly useful as a way to "rewrite" history.
+
+```bash
+git reset --hard 7f733ac
+```
+
+The most brute-force way to undo changes is with a "hard reset". Be aware that this will not only "rewind the clock" to a specific commit, but nuke any changes that have been make in the project since that point in time. Those changes will be lost.
+
+### Summary
+
+Phew, that was quite a lot. Let's summarize the local Git workflow for change tracking:
+
+<Terminal
+  height={480}
+  steps={[
+    {
+      text: `$ git init
+Initialized empty Git repository in /home/users/git-tutorial/.git/`,
+      explanation: "Start by initialising a repository.",
+    },
+    {
+      text: `$ echo "This is my text document." > my-document.txt
+$ git status
+On branch main
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        my-document.txt
+
+nothing added to commit but untracked files present (use "git add" to track)`,
+      explanation: "Add new document and check Git status.",
+    },
+    {
+      text: `$ git add my-document.txt
+$ git status
+On branch main
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+        new file:   my-document.txt`,
+      explanation: "Add changes to 'staging area'.",
+    },
+    {
+      text: `$ git commit -m "Add test document"
+[main (root-commit) 7f733ac] Add test document
+ 1 file changed, 1 insertion(+)
+ create mode 100644 my-document.txt
+ $ git status
+ On branch main
+nothing to commit, working tree clean`,
+      explanation: 'Commit staged changes to repository.'
+    },
+    {
+      text: `$ git log --oneline
+7f733ac (HEAD -> main) Add my document`,
+      explanation: 'Commit is listed in version history.'
+    },
+    {
+      text: `$ git show 7f733ac
+commit 7f733acc8a49155e889e10e44fd73661cdadf2f6
+Author: My Name <hello@example.com>
+Date:   Wed Nov 10 13:29:54 2021 +0100
+
+    Add test document
+
+diff --git a/my-document.txt b/my-document.txt
+new file mode 100644
+index 0000000..55c7b33
+--- /dev/null
++++ b/my-document.txt
+@@ -0,0 +1 @@
++This is my text document.`,
+      explanation: 'View changes saved in a particular snapshot.'
+    },
+    {
+      text: `$ echo "This is another document." > another-document.txt
+$ sed -i s/text/test/ my-document.txt
+$ git add -A
+$ git commit -m "Add new document and change initial document"
+[main ab9b27f] Add new document and change initial document
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+ create mode 100644 another-document.txt`,
+      explanation: 'Commit new changes.'
+    },
+    {
+      text: `$ git log --oneline
+ab9b27f (HEAD -> main) Add new document and change initial document
+7f733ac Add test document
+$ git diff 7f733ac ab9b27f
+diff --git a/another-document.txt b/another-document.txt
+new file mode 100644
+index 0000000..41a52d8
+--- /dev/null
++++ b/another-document.txt
+@@ -0,0 +1 @@
++This is another document.
+diff --git a/my-document.txt b/my-document.txt
+index 55c7b33..3cd0a96 100644
+--- a/my-document.txt
++++ b/my-document.txt
+@@ -1 +1 @@
+-This is my text document.
++This is my test document.`,
+    explanation: 'Compare two snapshots.'
+    },
+    {
+      text: `$ git reset 7f733ac
+Unstaged changes after reset:
+M       my-document.txt
+$ git status
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   my-document.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        another-document.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")`,
+      explanation: ''
+    }
+  ]}
+/>
+
+### Official terminology: Working Area, Staging Area, Repository
+
+So far, we have been using rather loose terminology. This diagram is a great summary of how content moves in Git, between the "working area", which is simply the files and folders in a project as they exist on your computer, the "staging area", which we have called "holding zone" above, and the "repository", which are the permanently recorded commit snapshots.
+
+![How content moves in Git](/assets/images/three-git-areas.png)
+
+## Using Git for collaborative team work
+
+## Bonus: Editor integrations
+
