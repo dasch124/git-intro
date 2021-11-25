@@ -7,12 +7,13 @@ import { Terminal } from "../components/Terminal";
 
 As knowledge workers, we constantly create and edit content, change a document, save it, change it again, share it with colleagues, etc.
 
-Git is a free and open-source "version control" software, which can help that process by:
+Git is a free and open-source "version control" software, which can help that process by
 
-- tracking changes, and versioning content and code
-- fostering collaborative work, with diffing and conflict resolution, as well as clear attribution
+- tracking changes, and versioning content and code,
+- supporting collaborative work by automatically comparing ("diffing") and combining ("merging") two or more versions of the same file, and
+- clear attribution, making it transparent which part of a file has been changed by whom and when ("blame").
 
-Git works best when used with plaintext file formats such as source code, XML/TEI documents or Markdown content. While Git will happily *store* images, audio files, or `.doc` and `.pdf` documents, it was not *designed* for those.
+Git works best when used with plaintext file formats such as source code, XML/TEI documents or Markdown content. While Git will happily *store* images, audio files, or `.doc` and `.pdf` documents, it is not able to provide it's full diffing/merging capacities with them.
 
 ## Tracking changes
 
@@ -24,7 +25,7 @@ Git can record which changes, to which documents, have been made when, and by wh
 
 Version control allows to save versions of content, restore previous versions, and compare different versions. This is especially beneficial when working with multiple documents, and when working in teams of more than one (potentially working on the same document).
 
-Let's look at how change tracking with Git works in practice, in a local project on your computer (no network connection required). We'll walk through how to work with Git in the terminal, because that is where Git was originally meant to be used, and because it helps to understand what is actually going on. This involves learning a handful of Git commands, and while that might seem intimidating at first, you'll see that it becomes second-nature with a bit of practice very quickly. However, if you prefer to work with Git via a graphical user interface, take a look at the bonus section at the end of this introduction, which lists some popular editor integrations.
+Let's look at how change tracking with Git works in practice, in a local project on your computer (no network connection required). We'll walk through how to work with Git in the terminal, because that is where Git was originally meant to be used, and because it helps to understand what is actually going on. This involves learning a handful of Git commands, and while that might seem intimidating at first, you'll see that it becomes second-nature with a bit of practice very quickly. However, if you prefer to work with Git via a graphical user interface, take a look at the bonus section at the end of this introduction, which lists some popular editor or operating system integrations.
 
 <SideNote type="info" title="Installation instructions">
 
@@ -42,13 +43,17 @@ git config --global user.email "myname@example.com"
 
 ### Initialise a Git project
 
-First, we need to tell Git that it should start to manage a project directory and keep an eye on changes to documents there. Navigate to your project folder in your terminal of choice, and type:
+First, we need to tell Git that it should start to manage a project directory and keep an eye on changes to documents there. On a Windows PC, run the Programm `git shell`, on Mac or Linux use the terminal of your choice. Navigate to the folder which contains the data you want to version (usually done by typing `cd {folder-name}`, e.g. `cd Documents`) , and afterwards type:
 
 ```bash
 git init
 ```
 
-This will initially set up Git's internal bookkeeping metadata, which is stored in a hidden `.git` folder.
+This will initially set up Git's internal bookkeeping metadata, which is stored in a hidden `.git` folder. Git will respond us with this (or a simliar) message:
+
+```bash
+Leeres Git-Repository in /home/Documents/.git/ initialisiert
+```
 
 Let's also create some new content. In a real research project this would mean editing or adding an XML/TEI document or similar. To demonstrate the mechanics we'll keep it basic here and use the terminal to create a simple text file (don't worry how this works, this has nothing to do with Git):
 
@@ -65,7 +70,22 @@ We can always check what Git knows about the state of our project with:
 git status
 ```
 
-Note that Git informs us that changes have been made to a file called `my-document.txt`, but that file is currently "untracked", which means it is not currently managed by Git's versioning. Git also tells us that in order to tell it to keep track of changes to that file, we should "use `git add` to track". Generally, if you find yourself in situations where you're unsure how to proceed, `git status` will most of the time show helpful hints. It's probably the Git command you'll be using most often.
+Note that Git informs us that changes have been made to a file called `my-document.txt`, but that file is currently "untracked", which means it is not currently managed by Git's versioning. Git also tells us that we should "use `git add` to track" the file, i.e. to keep track of changes to that file in the future. 
+
+```bash
+Auf Branch master
+
+Noch keine Commits
+
+Unversionierte Dateien:
+  (benutzen Sie "git add <Datei>...", um die Änderungen zum Commit vorzumerken)
+	my-document.txt
+
+nichts zum Commit vorgemerkt, aber es gibt unversionierte Dateien
+(benutzen Sie "git add" zum Versionieren)
+```
+
+Generally, if you find yourself in situations where you're unsure how to proceed, `git status` will most of the time show helpful hints. It's probably the Git command you'll be using most often.
 
 ### Mark content changes to be included in the version history
 
